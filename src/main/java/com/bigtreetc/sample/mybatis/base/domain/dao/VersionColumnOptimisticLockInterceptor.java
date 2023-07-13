@@ -116,17 +116,6 @@ public class VersionColumnOptimisticLockInterceptor implements Interceptor {
     return null;
   }
 
-  private Object setPropertyValue(Object obj, String propertyName, Object value) {
-    try {
-      PropertyDescriptor pd = new PropertyDescriptor(propertyName, obj.getClass());
-      Method setterMethod = pd.getWriteMethod();
-      return setterMethod.invoke(obj, value);
-    } catch (Exception e) {
-      // ignore
-    }
-    return obj;
-  }
-
   private String getSelectStatementId(MappedStatement mappedStatement) {
     return mappedStatement
         .getId()

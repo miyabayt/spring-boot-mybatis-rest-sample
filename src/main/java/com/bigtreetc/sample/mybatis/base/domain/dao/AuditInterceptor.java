@@ -1,6 +1,7 @@
 package com.bigtreetc.sample.mybatis.base.domain.dao;
 
 import java.lang.reflect.Field;
+import lombok.SneakyThrows;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
@@ -27,31 +28,32 @@ public class AuditInterceptor implements Interceptor {
     Class<?> clazz = entityObj.getClass();
     Field[] fields = clazz.getDeclaredFields();
     for (Field field : fields) {
-      field.setAccessible(true);
       if (mappedStatement.getSqlCommandType() == SqlCommandType.INSERT
-          && field.getAnnotation(CreatedDate.class) != null
-          && field.get(entityObj) == null) {
-        setAuditDateTime(entityObj, field);
+          && field.getAnnotation(CreatedDate.class) != null) {
+        Object value = AuditInfoHolder.getAuditDateTime();
+        setFieldValue(field, entityObj, value, false);
       } else if (field.getAnnotation(LastModifiedDate.class) != null) {
-        setAuditDateTime(entityObj, field);
+        Object value = AuditInfoHolder.getAuditDateTime();
+        setFieldValue(field, entityObj, value, true);
       }
       if (mappedStatement.getSqlCommandType() == SqlCommandType.INSERT
-          && field.getAnnotation(CreatedBy.class) != null
-          && field.get(entityObj) == null) {
-        setAuditUser(entityObj, field);
+          && field.getAnnotation(CreatedBy.class) != null) {
+        Object value = AuditInfoHolder.getAuditUser();
+        setFieldValue(field, entityObj, value, false);
       } else if (field.getAnnotation(LastModifiedBy.class) != null) {
-        setAuditUser(entityObj, field);
+        Object value = AuditInfoHolder.getAuditUser();
+        setFieldValue(field, entityObj, value, true);
       }
     }
 
     return invocation.proceed();
   }
 
-  private void setAuditDateTime(Object obj, Field field) throws IllegalAccessException {
-    field.set(obj, AuditInfoHolder.getAuditDateTime());
-  }
-
-  private void setAuditUser(Object obj, Field field) throws IllegalAccessException {
-    field.set(obj, AuditInfoHolder.getAuditUser());
+  @SneakyThrows
+  private void setFieldValue(Field field, Object obj, Object value, boolean overwrite) {
+    field.setAccessible(true);
+    if (overwrite || field.get(obj) == null) {
+      field.set(obj, value);
+    }
   }
 }
