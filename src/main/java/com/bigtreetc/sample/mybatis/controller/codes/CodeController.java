@@ -1,5 +1,6 @@
 package com.bigtreetc.sample.mybatis.controller.codes;
 
+import static com.bigtreetc.sample.mybatis.base.util.ValidateUtils.isNotEmpty;
 import static java.util.stream.Collectors.toList;
 
 import com.bigtreetc.sample.mybatis.base.exception.ValidationErrorException;
@@ -115,7 +116,11 @@ public class CodeController extends AbstractRestController {
   public ApiResponse search(
       @ModelAttribute SearchCodeRequest request, @Parameter(hidden = true) Pageable pageable) {
     // 入力値からDTOを作成する
-    val example = modelMapper.map(request, CodeExample.class);
+    val example = new CodeExample();
+    val criteria = example.createCriteria();
+    if (isNotEmpty(request.getCategoryCode())) {
+      criteria.andCategoryCodeEqualTo(request.getCategoryCode());
+    }
 
     // 10件で区切って取得する
     val data = codeService.findAll(example, pageable);
@@ -286,7 +291,11 @@ public class CodeController extends AbstractRestController {
     setContentDispositionHeader(response, filename, true);
 
     // 入力値から検索条件を作成する
-    val example = modelMapper.map(request, CodeExample.class);
+    val example = new CodeExample();
+    val criteria = example.createCriteria();
+    if (isNotEmpty(request.getCategoryCode())) {
+      criteria.andCategoryCodeEqualTo(request.getCategoryCode());
+    }
 
     // CSV出力する
     try (val outputStream = response.getOutputStream()) {

@@ -1,5 +1,6 @@
 package com.bigtreetc.sample.mybatis.controller.roles;
 
+import static com.bigtreetc.sample.mybatis.base.util.ValidateUtils.isNotEmpty;
 import static java.util.stream.Collectors.toList;
 
 import com.bigtreetc.sample.mybatis.base.exception.ValidationErrorException;
@@ -128,7 +129,14 @@ public class RoleController extends AbstractRestController {
   public ApiResponse search(
       @ModelAttribute SearchRoleRequest request, @Parameter(hidden = true) Pageable pageable) {
     // 入力値からDTOを作成する
-    val example = modelMapper.map(request, RoleExample.class);
+    val example = new RoleExample();
+    val criteria = example.createCriteria();
+    if (isNotEmpty(request.getRoleName())) {
+      criteria.andRoleNameLike("%" + request.getRoleName() + "%");
+    }
+    if (isNotEmpty(request.getRoleCode())) {
+      criteria.andRoleCodeEqualTo(request.getRoleCode());
+    }
 
     // 10件で区切って取得する
     val data = roleService.findAll(example, pageable);
@@ -307,7 +315,14 @@ public class RoleController extends AbstractRestController {
     setContentDispositionHeader(response, filename, true);
 
     // 入力値から検索条件を作成する
-    val example = modelMapper.map(request, RoleExample.class);
+    val example = new RoleExample();
+    val criteria = example.createCriteria();
+    if (isNotEmpty(request.getRoleName())) {
+      criteria.andRoleNameLike("%" + request.getRoleName() + "%");
+    }
+    if (isNotEmpty(request.getRoleCode())) {
+      criteria.andRoleCodeEqualTo(request.getRoleCode());
+    }
 
     // CSV出力する
     try (val outputStream = response.getOutputStream()) {

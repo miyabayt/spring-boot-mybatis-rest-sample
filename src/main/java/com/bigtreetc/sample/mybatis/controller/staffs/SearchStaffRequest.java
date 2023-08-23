@@ -12,9 +12,7 @@ public class SearchStaffRequest implements Serializable {
 
   Long id;
 
-  String firstName;
-
-  String lastName;
+  String fullName;
 
   String email;
 }

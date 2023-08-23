@@ -1,5 +1,6 @@
 package com.bigtreetc.sample.mybatis.controller.mailtemplates;
 
+import static com.bigtreetc.sample.mybatis.base.util.ValidateUtils.isNotEmpty;
 import static java.util.stream.Collectors.toList;
 
 import com.bigtreetc.sample.mybatis.base.exception.ValidationErrorException;
@@ -116,7 +117,14 @@ public class MailTemplateController extends AbstractRestController {
       @ModelAttribute SearchMailTemplateRequest request,
       @Parameter(hidden = true) Pageable pageable) {
     // 入力値からDTOを作成する
-    val example = modelMapper.map(request, MailTemplateExample.class);
+    val example = new MailTemplateExample();
+    val criteria = example.createCriteria();
+    if (isNotEmpty(request.getSubject())) {
+      criteria.andSubjectLike("%" + request.getSubject() + "%");
+    }
+    if (isNotEmpty(request.getTemplateCode())) {
+      criteria.andTemplateCodeEqualTo(request.getTemplateCode());
+    }
 
     // 10件で区切って取得する
     val data = mailTemplateService.findAll(example, pageable);
@@ -291,7 +299,14 @@ public class MailTemplateController extends AbstractRestController {
     setContentDispositionHeader(response, filename, true);
 
     // 入力値から検索条件を作成する
-    val example = modelMapper.map(request, MailTemplateExample.class);
+    val example = new MailTemplateExample();
+    val criteria = example.createCriteria();
+    if (isNotEmpty(request.getSubject())) {
+      criteria.andSubjectLike("%" + request.getSubject() + "%");
+    }
+    if (isNotEmpty(request.getTemplateCode())) {
+      criteria.andTemplateCodeEqualTo(request.getTemplateCode());
+    }
 
     // CSV出力する
     try (val outputStream = response.getOutputStream()) {

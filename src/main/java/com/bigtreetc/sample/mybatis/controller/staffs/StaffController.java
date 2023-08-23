@@ -123,7 +123,14 @@ public class StaffController extends AbstractRestController {
   public ApiResponse search(
       @ModelAttribute SearchStaffRequest request, @Parameter(hidden = true) Pageable pageable) {
     // 入力値からDTOを作成する
-    val example = modelMapper.map(request, StaffExample.class);
+    val example = new StaffExample();
+    val criteria = example.createCriteria();
+    if (isNotEmpty(request.getFullName())) {
+      criteria.andFullNameLike("%" + request.getFullName() + "%");
+    }
+    if (isNotEmpty(request.getEmail())) {
+      criteria.andEmailLike("%" + request.getEmail() + "%");
+    }
 
     // 10件で区切って取得する
     val data = staffService.findAll(example, pageable);
@@ -299,7 +306,14 @@ public class StaffController extends AbstractRestController {
     setContentDispositionHeader(response, filename, true);
 
     // 入力値から検索条件を作成する
-    val example = modelMapper.map(request, StaffExample.class);
+    val example = new StaffExample();
+    val criteria = example.createCriteria();
+    if (isNotEmpty(request.getFullName())) {
+      criteria.andFullNameLike("%" + request.getFullName() + "%");
+    }
+    if (isNotEmpty(request.getEmail())) {
+      criteria.andEmailLike("%" + request.getEmail() + "%");
+    }
 
     // CSV出力する
     try (val outputStream = response.getOutputStream()) {

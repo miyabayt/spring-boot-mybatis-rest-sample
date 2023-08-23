@@ -19,6 +19,8 @@ public class User implements BaseEntity, Serializable {
 
   private String lastName;
 
+  private String fullName;
+
   private String email;
 
   private String password;
@@ -47,6 +49,7 @@ public class User implements BaseEntity, Serializable {
     id("user_id", "id", "BIGINT", false),
     firstName("first_name", "firstName", "VARCHAR", false),
     lastName("last_name", "lastName", "VARCHAR", false),
+    fullName("full_name", "fullName", "VARCHAR", false),
     email("email", "email", "VARCHAR", false),
     password("password", "password", "VARCHAR", false),
     tel("tel", "tel", "VARCHAR", false),

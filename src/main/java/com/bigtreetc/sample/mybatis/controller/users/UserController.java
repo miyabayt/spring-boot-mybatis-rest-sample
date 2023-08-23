@@ -10,7 +10,6 @@ import com.bigtreetc.sample.mybatis.base.web.controller.api.response.ApiResponse
 import com.bigtreetc.sample.mybatis.base.web.controller.api.response.CountApiResponseImpl;
 import com.bigtreetc.sample.mybatis.base.web.controller.api.response.PageableApiResponseImpl;
 import com.bigtreetc.sample.mybatis.base.web.controller.api.response.SimpleApiResponseImpl;
-import com.bigtreetc.sample.mybatis.controller.codes.SearchCodeRequest;
 import com.bigtreetc.sample.mybatis.domain.model.generated.User;
 import com.bigtreetc.sample.mybatis.domain.model.generated.UserExample;
 import com.bigtreetc.sample.mybatis.domain.service.UserService;
@@ -124,7 +123,14 @@ public class UserController extends AbstractRestController {
   public ApiResponse search(
       @ModelAttribute SearchUserRequest request, @Parameter(hidden = true) Pageable pageable) {
     // 入力値からDTOを作成する
-    val example = modelMapper.map(request, UserExample.class);
+    val example = new UserExample();
+    val criteria = example.createCriteria();
+    if (isNotEmpty(request.getEmail())) {
+      criteria.andEmailLike("%" + request.getEmail() + "%");
+    }
+    if (isNotEmpty(request.getFullName())) {
+      criteria.andFullNameLike("%" + request.getFullName() + "%");
+    }
 
     // 10件で区切って取得する
     val data = userService.findAll(example, pageable);
@@ -293,14 +299,21 @@ public class UserController extends AbstractRestController {
   @GetMapping("/users/export/{filename:.+\\.csv}")
   public void downloadCsv(
       @PathVariable String filename,
-      @ModelAttribute SearchCodeRequest request,
+      @ModelAttribute SearchUserRequest request,
       HttpServletResponse response)
       throws IOException {
     // ダウンロード時のファイル名をセットする
     setContentDispositionHeader(response, filename, true);
 
     // 入力値から検索条件を作成する
-    val example = modelMapper.map(request, UserExample.class);
+    val example = new UserExample();
+    val criteria = example.createCriteria();
+    if (isNotEmpty(request.getEmail())) {
+      criteria.andEmailLike("%" + request.getEmail() + "%");
+    }
+    if (isNotEmpty(request.getFullName())) {
+      criteria.andFullNameLike("%" + request.getFullName() + "%");
+    }
 
     // CSV出力する
     try (val outputStream = response.getOutputStream()) {
@@ -321,7 +334,7 @@ public class UserController extends AbstractRestController {
   @PostMapping("/users/export/{filename:.+\\.csv}")
   public void searchByPost(
       @PathVariable String filename,
-      @RequestBody SearchCodeRequest request,
+      @RequestBody SearchUserRequest request,
       HttpServletResponse response)
       throws IOException {
     downloadCsv(filename, request, response);

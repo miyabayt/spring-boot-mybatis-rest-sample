@@ -1,5 +1,6 @@
 package com.bigtreetc.sample.mybatis.controller.holidays;
 
+import static com.bigtreetc.sample.mybatis.base.util.ValidateUtils.isNotEmpty;
 import static java.util.stream.Collectors.toList;
 
 import com.bigtreetc.sample.mybatis.base.exception.ValidationErrorException;
@@ -115,7 +116,14 @@ public class HolidayController extends AbstractRestController {
   public ApiResponse search(
       @ModelAttribute SearchHolidayRequest request, @Parameter(hidden = true) Pageable pageable) {
     // 入力値からDTOを作成する
-    val example = modelMapper.map(request, HolidayExample.class);
+    val example = new HolidayExample();
+    val criteria = example.createCriteria();
+    if (isNotEmpty(request.getHolidayName())) {
+      criteria.andHolidayNameLike("%" + request.getHolidayName() + "%");
+    }
+    if (request.getHolidayDate() != null) {
+      criteria.andHolidayDateEqualTo(request.getHolidayDate());
+    }
 
     // 10件で区切って取得する
     val data = holidayService.findAll(example, pageable);
@@ -286,7 +294,14 @@ public class HolidayController extends AbstractRestController {
     setContentDispositionHeader(response, filename, true);
 
     // 入力値から検索条件を作成する
-    val example = modelMapper.map(request, HolidayExample.class);
+    val example = new HolidayExample();
+    val criteria = example.createCriteria();
+    if (isNotEmpty(request.getHolidayName())) {
+      criteria.andHolidayNameLike("%" + request.getHolidayName() + "%");
+    }
+    if (request.getHolidayDate() != null) {
+      criteria.andHolidayDateEqualTo(request.getHolidayDate());
+    }
 
     // CSV出力する
     try (val outputStream = response.getOutputStream()) {

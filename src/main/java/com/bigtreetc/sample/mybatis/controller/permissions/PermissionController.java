@@ -1,5 +1,6 @@
 package com.bigtreetc.sample.mybatis.controller.permissions;
 
+import static com.bigtreetc.sample.mybatis.base.util.ValidateUtils.isNotEmpty;
 import static java.util.stream.Collectors.toList;
 
 import com.bigtreetc.sample.mybatis.base.exception.ValidationErrorException;
@@ -127,7 +128,11 @@ public class PermissionController extends AbstractRestController {
       @ModelAttribute SearchPermissionRequest request,
       @Parameter(hidden = true) Pageable pageable) {
     // 入力値からDTOを作成する
-    val example = modelMapper.map(request, PermissionExample.class);
+    val example = new PermissionExample();
+    val criteria = example.createCriteria();
+    if (isNotEmpty(request.getPermissionName())) {
+      criteria.andPermissionNameLike("%" + request.getPermissionName() + "%");
+    }
 
     // 10件で区切って取得する
     val data = permissionService.findAll(example, pageable);
@@ -303,7 +308,11 @@ public class PermissionController extends AbstractRestController {
     setContentDispositionHeader(response, filename, true);
 
     // 入力値から検索条件を作成する
-    val example = modelMapper.map(request, PermissionExample.class);
+    val example = new PermissionExample();
+    val criteria = example.createCriteria();
+    if (isNotEmpty(request.getPermissionName())) {
+      criteria.andPermissionNameLike("%" + request.getPermissionName() + "%");
+    }
 
     // CSV出力する
     try (val outputStream = response.getOutputStream()) {

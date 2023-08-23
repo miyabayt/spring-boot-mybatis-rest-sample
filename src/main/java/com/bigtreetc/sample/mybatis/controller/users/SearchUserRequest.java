@@ -11,9 +11,9 @@ public class SearchUserRequest {
 
   Long id;
 
-  String firstName;
+  String fullName;
 
-  String lastName;
+  String email;
 
   String password;
 }

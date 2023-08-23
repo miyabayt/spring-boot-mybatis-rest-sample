@@ -1,5 +1,6 @@
 package com.bigtreetc.sample.mybatis.controller.codecategories;
 
+import static com.bigtreetc.sample.mybatis.base.util.ValidateUtils.isNotEmpty;
 import static java.util.stream.Collectors.toList;
 
 import com.bigtreetc.sample.mybatis.base.exception.ValidationErrorException;
@@ -9,7 +10,6 @@ import com.bigtreetc.sample.mybatis.base.web.controller.api.response.ApiResponse
 import com.bigtreetc.sample.mybatis.base.web.controller.api.response.CountApiResponseImpl;
 import com.bigtreetc.sample.mybatis.base.web.controller.api.response.PageableApiResponseImpl;
 import com.bigtreetc.sample.mybatis.base.web.controller.api.response.SimpleApiResponseImpl;
-import com.bigtreetc.sample.mybatis.controller.codes.SearchCodeRequest;
 import com.bigtreetc.sample.mybatis.domain.model.generated.CodeCategory;
 import com.bigtreetc.sample.mybatis.domain.model.generated.CodeCategoryExample;
 import com.bigtreetc.sample.mybatis.domain.service.CodeCategoryService;
@@ -118,9 +118,15 @@ public class CodeCategoryController extends AbstractRestController {
   public ApiResponse search(
       @ModelAttribute SearchCodeCategoryRequest request,
       @Parameter(hidden = true) Pageable pageable) {
-
     // 入力値からDTOを作成する
-    val example = modelMapper.map(request, CodeCategoryExample.class);
+    val example = new CodeCategoryExample();
+    val criteria = example.createCriteria();
+    if (isNotEmpty(request.getCategoryName())) {
+      criteria.andCategoryNameLike("%" + request.getCategoryName() + "%");
+    }
+    if (isNotEmpty(request.getCategoryCode())) {
+      criteria.andCategoryCodeEqualTo(request.getCategoryCode());
+    }
 
     // 10件で区切って取得する
     val data = codeCategoryService.findAll(example, pageable);
@@ -288,14 +294,22 @@ public class CodeCategoryController extends AbstractRestController {
   @GetMapping("/codeCategories/export/{filename:.+\\.csv}")
   public void downloadCsv(
       @PathVariable String filename,
-      @ModelAttribute SearchCodeRequest request,
+      @ModelAttribute SearchCodeCategoryRequest request,
       HttpServletResponse response)
       throws IOException {
     // ダウンロード時のファイル名をセットする
     setContentDispositionHeader(response, filename, true);
 
     // 入力値から検索条件を作成する
-    val example = modelMapper.map(request, CodeCategoryExample.class);
+
+    val example = new CodeCategoryExample();
+    val criteria = example.createCriteria();
+    if (isNotEmpty(request.getCategoryName())) {
+      criteria.andCategoryNameLike("%" + request.getCategoryName() + "%");
+    }
+    if (isNotEmpty(request.getCategoryCode())) {
+      criteria.andCategoryCodeEqualTo(request.getCategoryCode());
+    }
 
     // CSV出力する
     try (val outputStream = response.getOutputStream()) {
@@ -316,7 +330,7 @@ public class CodeCategoryController extends AbstractRestController {
   @PostMapping("/codeCategories/export/{filename:.+\\.csv}")
   public void searchByPost(
       @PathVariable String filename,
-      @RequestBody SearchCodeRequest request,
+      @RequestBody SearchCodeCategoryRequest request,
       HttpServletResponse response)
       throws IOException {
     downloadCsv(filename, request, response);
