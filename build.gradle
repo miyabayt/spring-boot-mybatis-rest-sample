@@ -45,7 +45,7 @@ configurations {
 
 sourceCompatibility = "17"
 [compileJava, compileTestJava]*.options*.encoding = "UTF-8"
-[compileJava, compileTestJava]*.options*.compilerArgs = ["-Xlint:all"]
+[compileJava, compileTestJava]*.options*.compilerArgs = ["-parameters", "-Xlint:all"]
 
 dependencies {
     compileOnly "org.projectlombok:lombok"
