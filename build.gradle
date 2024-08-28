@@ -69,7 +69,7 @@ dependencies {
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-csv"
 
-    implementation "org.modelmapper:modelmapper:3.1.1"
+    implementation "org.modelmapper:modelmapper:3.2.1"
     implementation "com.auth0:java-jwt:4.4.0"
     implementation "org.springdoc:springdoc-openapi-ui:${springdocVersion}"
     implementation "org.springdoc:springdoc-openapi-security:${springdocVersion}"
